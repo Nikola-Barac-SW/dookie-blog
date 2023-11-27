@@ -34,6 +34,7 @@ export function PostsToolbar({
 
   return (
     <>
+      <h4>Sort by</h4>
       <select
         defaultValue=""
         onChange={(event) => {
@@ -50,6 +51,7 @@ export function PostsToolbar({
         ))}
       </select>
 
+      <h4>Filter by</h4>
       {Object.keys(filterOptions).map((filterKey) => (
         <select
           key={filterKey}
