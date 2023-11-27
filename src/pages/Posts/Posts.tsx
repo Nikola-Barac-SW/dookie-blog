@@ -62,18 +62,18 @@ function Posts() {
 
   const sortHandlers: Record<string, SortHandler<Post>> = {
     publishedAt: (current, next) => {
-      const currentValue = moment(current.publishedAt);
-      const nextValue = moment(next.publishedAt);
+      const currentValue = moment(current.publishedAt, "DD/MM/YYYY HH:mm:ss");
+      const nextValue = moment(next.publishedAt, "DD/MM/YYYY HH:mm:ss");
       const delta = currentValue.diff(nextValue, "milliseconds");
 
-      return delta / Math.abs(delta);
+      return delta === 0 ? 0 : delta / Math.abs(delta);
     },
     updatedAt: (current, next) => {
-      const currentValue = moment(current.updatedAt);
-      const nextValue = moment(next.updatedAt);
+      const currentValue = moment(current.updatedAt, "DD/MM/YYYY HH:mm:ss");
+      const nextValue = moment(next.updatedAt, "DD/MM/YYYY HH:mm:ss");
       const delta = currentValue.diff(nextValue, "milliseconds");
 
-      return delta / Math.abs(delta);
+      return delta === 0 ? 0 : delta / Math.abs(delta);
     }
   };
 
