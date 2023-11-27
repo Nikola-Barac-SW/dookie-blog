@@ -128,6 +128,23 @@ export class RecordCollection<V> implements Collection<V> {
     return new RecordCollection(result);
   }
 
+  unique(): Collection<V> {
+    const result = {} as Record<string, V>;
+    const set = new Set<V>();
+
+    this.each((value, key) => {
+      if (set.has(value)) {
+        return;
+      }
+
+      set.add(value);
+
+      result[key] = value;
+    });
+
+    return new RecordCollection(result);
+  }
+
   toArray(): V[] {
     return Object.keys(this.values).map((key) => this.values[key]);
   }

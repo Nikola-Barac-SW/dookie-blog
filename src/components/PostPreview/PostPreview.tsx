@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styles from "./PostPreview.module.scss";
 
 interface PostProps {
+  id: number;
   slug: string;
   title: string;
   content: string;
@@ -16,6 +17,7 @@ interface PostProps {
   commentCount?: number;
 }
 function Post({
+  id,
   slug,
   title,
   content,
@@ -29,6 +31,7 @@ function Post({
 }: PostProps) {
   return (
     <div className={styles.postPreview}>
+      <h2>{id}</h2>
       <img src={thumbnail} alt={slug} />
       <div>
         <h4>{title}</h4>
@@ -37,6 +40,9 @@ function Post({
         <span>
           {user?.firstname} {user?.lastname}
         </span>
+        <p>{category}</p>
+        <p>{publishedAt}</p>
+        <p>{updatedAt}</p>
         <Link to={`/posts/${slug}`}>View</Link>
       </div>
     </div>

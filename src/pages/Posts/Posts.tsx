@@ -1,12 +1,28 @@
+import type { Nullable, Post } from "@utils/types";
 import { useQuery } from "@tanstack/react-query";
 import { getPosts } from "@services/posts";
 import { getComments } from "@services/comments";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { collect } from "@utils/collection";
 import { getUsers } from "@services/users";
 import { PostPreview } from "@components/index";
+import { PostsToolbar } from "./components/PostsToolbar";
+import moment from "moment";
+
+type FilterHandler<T> = (value: T) => boolean;
+type SortDirection = 1 | -1;
+type SortHandler<T> = (current: T, next: T) => number;
+
+export type Sorter<T> = {
+  label: string;
+  field: keyof T;
+  direction: SortDirection;
+};
 
 function Posts() {
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [sorter, setSorter] = useState<Nullable<Sorter<Post>>>(null);
+
   const { data: posts, isLoading: isLoadingPosts } = useQuery({
     queryKey: ["posts"],
     queryFn: getPosts
@@ -39,14 +55,70 @@ function Posts() {
     }));
   }, [posts, comments, users]);
 
+  const filterHandlers: Record<string, FilterHandler<Post>> = {
+    category: ({ category }) => category === filters.category,
+    status: ({ status }) => status === filters.status
+  };
+
+  const sortHandlers: Record<string, SortHandler<Post>> = {
+    publishedAt: (current, next) => {
+      const currentValue = moment(current.publishedAt);
+      const nextValue = moment(next.publishedAt);
+      const delta = currentValue.diff(nextValue, "milliseconds");
+
+      return delta / Math.abs(delta);
+    },
+    updatedAt: (current, next) => {
+      const currentValue = moment(current.updatedAt);
+      const nextValue = moment(next.updatedAt);
+      const delta = currentValue.diff(nextValue, "milliseconds");
+
+      return delta / Math.abs(delta);
+    }
+  };
+
+  const filteredPosts = useMemo(() => {
+    let filtered = [...postsExtended];
+
+    for (const key in filters) {
+      const filterValue = filters[key];
+
+      if (!filterValue) {
+        continue;
+      }
+
+      filtered = filtered.filter(filterHandlers[key]);
+    }
+
+    return filtered;
+  }, [postsExtended, filters]);
+
+  const sortedPosts = useMemo(() => {
+    if (!sorter) {
+      return [...filteredPosts];
+    }
+
+    const { field, direction } = sorter;
+
+    return filteredPosts.sort((current, next) => {
+      return sortHandlers[field]?.(current, next) * direction ?? 0;
+    });
+  }, [sorter, filteredPosts]);
+
   if (isLoadingPosts && isLoadingComments && isLoadingUsers) {
     return <h3>Loading...</h3>;
   }
 
   return (
     <>
-      {postsExtended?.map(({ id, ...props }) => (
-        <PostPreview key={id} {...props} />
+      <PostsToolbar
+        posts={posts ?? []}
+        setFilters={setFilters}
+        setSorter={setSorter}
+      />
+
+      {sortedPosts?.map(({ id, ...props }) => (
+        <PostPreview key={id} id={id} {...props} />
       ))}
     </>
   );

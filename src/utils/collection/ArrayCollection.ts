@@ -118,6 +118,23 @@ export class ArrayCollection<V> implements Collection<V> {
     );
   }
 
+  unique(): Collection<V> {
+    const result = [] as V[];
+    const set = new Set<V>();
+
+    this.each((value) => {
+      if (set.has(value)) {
+        return;
+      }
+
+      set.add(value);
+
+      result.push(value);
+    });
+
+    return new ArrayCollection(result);
+  }
+
   toArray(): V[] {
     return this.values.splice(0);
   }

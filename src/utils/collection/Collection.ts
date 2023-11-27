@@ -35,5 +35,7 @@ export interface Collection<V> {
 
   pluck<T>(key: NestedKeys<V>): Collection<T>;
 
+  unique(): Collection<V>;
+
   toArray(): V[];
 }
